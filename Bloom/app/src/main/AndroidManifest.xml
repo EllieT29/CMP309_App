@@ -27,6 +27,11 @@
             android:exported="false"
             android:label="Journal"
             android:theme="@style/Theme.Bloom" />
+        <activity
+            android:name=".TaskActivity"
+            android:exported="false"
+            android:label="Task"
+            android:theme="@style/Theme.Bloom" />
     </application>
 
 </manifest>

@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,8 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHost
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -150,7 +146,7 @@ fun TopBar(navController: NavController) {
                         menuExpanded = false
                     }
                 )
-                // Dropdown menu item for Local Storage
+                // Dropdown menu item for Journal
                 DropdownMenuItem(
                     text = { Text("Journal") },
                     onClick = {
@@ -159,7 +155,16 @@ fun TopBar(navController: NavController) {
                         menuExpanded = false
                     }
                 )
-                //
+                // Dropdown menu item for Tasks
+                DropdownMenuItem(
+                    text = { Text("Tasks") },
+                    onClick = {
+                        val intent = Intent(context, TaskActivity::class.java)
+                        context.startActivity(intent)
+                        menuExpanded = false
+                    }
+                )
+
             }
         }
     )
