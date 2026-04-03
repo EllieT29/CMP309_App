@@ -1,5 +1,6 @@
 package com.example.bloom
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -37,9 +39,8 @@ import androidx.navigation.NavHost
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import com.example.bloom.ui.theme.BloomTheme
 
 
@@ -104,6 +105,7 @@ fun TopBar(navController: NavController) {
     var menuExpanded by remember { mutableStateOf(false) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val context = LocalContext.current
 
     // A screen is a top-level screen if it's in our bottom nav.
     val isTopLevelDestination = bottomNavItems.any { it.route == currentDestination?.route }
@@ -148,6 +150,16 @@ fun TopBar(navController: NavController) {
                         menuExpanded = false
                     }
                 )
+                // Dropdown menu item for Local Storage
+                DropdownMenuItem(
+                    text = { Text("Journal") },
+                    onClick = {
+                        val intent = Intent(context, JournalActivity::class.java)
+                        context.startActivity(intent)
+                        menuExpanded = false
+                    }
+                )
+                //
             }
         }
     )
