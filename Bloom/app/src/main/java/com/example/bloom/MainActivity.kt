@@ -1,5 +1,6 @@
 package com.example.bloom
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -133,6 +134,10 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
                 ) {
                     Flower(numCompletedTasks)
 
+                    MeditateMusic(context = LocalContext.current)
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
                     CurrentTask(task = currentTask, description = currentDescription)
 
                     Greeting()
@@ -251,6 +256,62 @@ fun BottomNavigationBar(navController: NavController) {
             }
         }
     }
+}
+
+
+// Used GeeksforGeeks for using services to play music - https://www.geeksforgeeks.org/kotlin/services-in-android-using-jetpack-compose/
+@Composable
+fun MeditateMusic(modifier: Modifier = Modifier, context: Context) {
+
+    val serviceStatus = remember {
+        mutableStateOf(MeditateService.isPlaying)
+    }
+    val buttonValue = if (serviceStatus.value) "Stop" else "Play"
+
+    Surface(
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp))
+        {//Used Developers for UI styling -
+            // https://developer.android.com/develop/ui/compose/text/style-paragraph
+            //https://developer.android.com/develop/ui/compose/layouts/basics
+            Text(
+                text = "Meditation Music",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    if (serviceStatus.value) {
+                        // service already running
+                        // stop the service
+                        serviceStatus.value = !serviceStatus.value
+                        context.stopService(Intent(context, MeditateService::class.java))
+
+                    } else {
+                        // service not running start service.
+                        serviceStatus.value = !serviceStatus.value
+                        // starting the service
+                        context.startService(Intent(context, MeditateService::class.java))
+                    }
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = buttonValue,
+                    modifier = Modifier.padding(10.dp),
+                    fontSize = 20.sp
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
