@@ -6,20 +6,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -27,11 +40,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -61,9 +82,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BloomTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MyApp(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
-                }
+                    MyApp(modifier = Modifier.fillMaxSize(), viewModel = viewModel)
             }
         }
     }
@@ -74,8 +93,17 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
     // Remember the NavController
     val navController = rememberNavController()
 
+    //Remember the scroll state
+    val scrollState = rememberScrollState()
+
+
+    //Get number of completed tasks
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
+    //Get details of first incomplete task
+    val firstIncompleteTask by viewModel.firstIncompleteTask.collectAsState(initial = null)
+    val currentTask = firstIncompleteTask?.title?: "Well done! You have completed all your tasks!"
+    val currentDescription = firstIncompleteTask?.description?: "Take a break and be proud :)"
 
     // Scaffold provides a framework for the app's layout
     Scaffold(
@@ -97,8 +125,18 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
             // Composable for the Test screen
             composable(Screen.Test.route) {
 
-                Flower(numCompletedTasks)
-                Greeting()
+                Column(
+                    modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(state = scrollState)
+                ) {
+                    Flower(numCompletedTasks)
+
+                    CurrentTask(task = currentTask, description = currentDescription)
+
+                    Greeting()
+                }
             }
         }
     }
@@ -118,7 +156,13 @@ fun TopBar(navController: NavController) {
     val isTopLevelDestination = bottomNavItems.any { it.route == currentDestination?.route }
 
     TopAppBar(
-        title = { Text("Bloom") },
+        title = { Text(
+            "Bloom",
+            style = MaterialTheme.typography.headlineLarge,
+            fontFamily = FontFamily.Cursive,
+            fontWeight = FontWeight.Bold,
+            fontSize = 55.sp)
+                },
         navigationIcon = {
             // Show the back button if we're not on a top-level screen.
             if (!isTopLevelDestination) {
@@ -209,7 +253,64 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
+@Composable
+fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String){
 
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    val extraPadding by animateDpAsState(
+        if (expanded) 48.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondary
+    ) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .padding(bottom = extraPadding.coerceAtLeast(0.dp))
+        )
+        {//https://developer.android.com/develop/ui/compose/text/style-paragraph
+            //https://developer.android.com/develop/ui/compose/layouts/basics
+            Text(
+                text = "Current Task",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = task,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            if (expanded) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+            }
+            Button(
+                onClick = {expanded = !expanded},
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = if (expanded) "Hide Details" else "Show Details",
+                    fontSize = 20.sp
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun Greeting() {

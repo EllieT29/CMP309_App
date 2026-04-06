@@ -115,7 +115,8 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp),
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondary
     ) {
         Row(
             modifier = Modifier

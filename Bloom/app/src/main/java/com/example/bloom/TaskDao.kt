@@ -21,4 +21,7 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM tasks WHERE isComplete = 1")
     fun getCompletedTaskCount(): Flow<Int>
 
+    @Query("SELECT * FROM tasks WHERE isComplete = 0 LIMIT 1")
+    fun getFirstIncompleteTask(): Flow<Task?>
+
 }

@@ -21,4 +21,6 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     }
     val completedTaskCount: Flow<Int> = repository.completedTaskCount
 
+    val firstIncompleteTask: Flow<Task?> = repository.firstIncompleteTask
+
 }
