@@ -69,6 +69,8 @@ class TaskActivity : ComponentActivity() {
 @Composable
 fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
     val tasks by viewModel.allTasks.collectAsState(initial = emptyList())
+    val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
+
 
     Scaffold() { padding ->
         Column(
@@ -81,6 +83,9 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(1f),
             ) {
+                item{
+                    Flower(numCompletedTasks)
+                }
                 items(tasks) { task ->
                     TaskItem(
                         task = task,

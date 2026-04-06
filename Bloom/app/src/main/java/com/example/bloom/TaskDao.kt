@@ -18,4 +18,7 @@ interface TaskDao {
     @Update
     suspend fun updateTask(task: Task)
 
+    @Query("SELECT COUNT(*) FROM tasks WHERE isComplete = 1")
+    fun getCompletedTaskCount(): Flow<Int>
+
 }

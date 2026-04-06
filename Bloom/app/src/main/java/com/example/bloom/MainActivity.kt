@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +40,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.bloom.ui.theme.BloomTheme
+import kotlin.getValue
 
 
 // Sealed class to define the screens in the app
@@ -50,13 +53,16 @@ val bottomNavItems = listOf(
     Screen.Test,
 )
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: TaskViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             BloomTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MyApp(modifier = Modifier.padding(innerPadding))
+                    MyApp(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
                 }
             }
         }
@@ -64,9 +70,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(modifier: Modifier = Modifier) {
+fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
     // Remember the NavController
     val navController = rememberNavController()
+
+    val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
+
 
     // Scaffold provides a framework for the app's layout
     Scaffold(
@@ -87,6 +96,8 @@ fun MyApp(modifier: Modifier = Modifier) {
         ) {
             // Composable for the Test screen
             composable(Screen.Test.route) {
+
+                Flower(numCompletedTasks)
                 Greeting()
             }
         }

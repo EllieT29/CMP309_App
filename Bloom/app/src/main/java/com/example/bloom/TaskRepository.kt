@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 class TaskRepository(private val taskDao: TaskDao) {
     val allTasks: Flow<List<Task>> = taskDao.getAllTasks()
 
+    val completedTaskCount: Flow<Int> = taskDao.getCompletedTaskCount()
+
     suspend fun insert(tasks: List<Task>) {
         taskDao.insertAll(tasks)
     }
