@@ -1,3 +1,12 @@
+import java.util.Properties
+
+val secretsPropertiesFile = rootProject.file("secrets.properties")
+
+val secretsProperties = Properties().apply {
+    if (secretsPropertiesFile.exists()) {
+        load(secretsPropertiesFile.inputStream())
+    }
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -28,6 +37,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_KEY", "\"${secretsProperties.getProperty("API_KEY") ?: ""}\"")
+        }
+        debug {
+            buildConfigField("String", "API_KEY", "\"${secretsProperties.getProperty("API_KEY") ?: ""}\"")
         }
     }
     compileOptions {
@@ -36,6 +49,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -56,6 +70,8 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging.interceptor)
 
+    // Security
+    implementation(libs.androidx.security.crypto)
 
     // Room
     implementation(libs.androidx.room.runtime)

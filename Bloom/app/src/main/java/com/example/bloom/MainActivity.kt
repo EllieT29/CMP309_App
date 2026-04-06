@@ -54,6 +54,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -61,6 +62,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.bloom.network.QuoteViewModel
 import com.example.bloom.ui.theme.BloomTheme
 import kotlin.getValue
 
@@ -139,6 +141,10 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
                     Spacer(modifier = Modifier.height(15.dp))
 
                     CurrentTask(task = currentTask, description = currentDescription)
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    DailyQuote(modifier = Modifier, quoteViewModel = viewModel())
 
                     Greeting()
                 }
@@ -372,6 +378,65 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
         }
     }
 }
+
+@Composable
+fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = viewModel()) {
+
+    quoteViewModel.fetchQuotes()
+
+    Surface(
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp))
+        {//https://developer.android.com/develop/ui/compose/text/style-paragraph
+            //https://developer.android.com/develop/ui/compose/layouts/basics
+            Text(
+                text = "Quote of the Day",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (quoteViewModel.isLoading) {
+                Text(
+                    "Loading...",
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
+                )
+            }
+            quoteViewModel.errorMessage?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            quoteViewModel.quotes.forEach { quoteItem ->
+                Text(
+                    text = "\"${quoteItem.quote}\"",
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "- ${quoteItem.author}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+
+                )
+            }
+
+        }
+    }
+
+}
+
 
 @Composable
 fun Greeting() {
