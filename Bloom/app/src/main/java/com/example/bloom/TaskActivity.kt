@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -83,9 +84,13 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
             )
         },
         bottomBar =  { BottomNavigationBar(currentRoute = Screen.Tasks.route) },
+        containerColor = MaterialTheme.colorScheme.background
         ) { padding ->
         Column(
             modifier = Modifier
@@ -130,7 +135,7 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.surface
     ) {
         Row(
             modifier = Modifier

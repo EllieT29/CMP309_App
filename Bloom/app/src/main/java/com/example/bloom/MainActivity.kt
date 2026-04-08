@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -83,7 +84,6 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
     //Remember the scroll state
     val scrollState = rememberScrollState()
 
-
     //Get number of completed tasks
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
@@ -129,8 +129,6 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
                     Spacer(modifier = Modifier.height(15.dp))
 
                     DailyQuote(modifier = Modifier, quoteViewModel = viewModel())
-
-                    Greeting()
                 }
             }
         }
@@ -158,6 +156,9 @@ fun TopBar(navController: NavController) {
             fontWeight = FontWeight.Bold,
             fontSize = 55.sp)
                 },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.secondary// Background color
+        ),
         navigationIcon = {
             // Show the back button if we're not on a top-level screen.
             if (!isTopLevelDestination) {
@@ -182,15 +183,6 @@ fun TopBar(navController: NavController) {
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false }
             ) {
-                // Dropdown menu item for Movies
-                DropdownMenuItem(
-                    text = { Text("Journal") },
-                    onClick = {
-                        val intent = Intent(context, JournalActivity::class.java)
-                        context.startActivity(intent)
-                        menuExpanded = false
-                    }
-                )
                 // Dropdown menu item for Journal
                 DropdownMenuItem(
                     text = { Text("Journal") },
@@ -225,7 +217,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context) {
     val buttonValue = if (serviceStatus.value) "Stop" else "Play"
 
     Surface(
-        color = MaterialTheme.colorScheme.secondary,
+        color = MaterialTheme.colorScheme.surface,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -286,7 +278,7 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier
             .padding(16.dp)
@@ -335,7 +327,7 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
     quoteViewModel.fetchQuotes()
 
     Surface(
-        color = MaterialTheme.colorScheme.secondary,
+        color = MaterialTheme.colorScheme.surface,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -387,18 +379,3 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
 
 }
 
-
-@Composable
-fun Greeting() {
-    Text(
-        text = "Hello there!",
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BloomTheme {
-        Greeting()
-    }
-}

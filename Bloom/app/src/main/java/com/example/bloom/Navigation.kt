@@ -27,6 +27,7 @@ val bottomNavItems = listOf(
     Screen.Tasks
 )
 
+
 @Composable
 fun BottomNavigationBar(currentRoute: String) {
     val context = LocalContext.current
