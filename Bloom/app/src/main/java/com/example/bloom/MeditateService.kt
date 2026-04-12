@@ -8,6 +8,8 @@ import android.os.IBinder
 
 
 //Used GeeksforGeeks - https://www.geeksforgeeks.org/kotlin/services-in-android-using-jetpack-compose/
+//Used Medium for enhancing the service (binding, pause feature etc -
+//https://medium.com/@anna972606/bound-service-in-android-72dbf2069f49
 class MeditateService : Service() {
 
     private var player: MediaPlayer? = null
@@ -23,12 +25,16 @@ class MeditateService : Service() {
     }
 
     fun play() {
-        if (player == null) {
-            player = MediaPlayer.create(this, R.raw.meditate)
-            player?.isLooping = true
-        }
-        if (player != null && !player!!.isPlaying) {
-            player?.start()
+        try {
+            if (player == null) {
+                player = MediaPlayer.create(this, R.raw.meditate)
+                player?.isLooping = true
+            }
+            if (player != null && !player!!.isPlaying) {
+                player?.start()
+            }
+        }catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

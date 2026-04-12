@@ -303,6 +303,8 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
     var isPlaying by remember { mutableStateOf(false) }
     var isStarted by remember { mutableStateOf(false) }
 
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
     Surface(
         color = MaterialTheme.colorScheme.secondary,
         modifier = modifier.fillMaxWidth(),
@@ -313,7 +315,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
             // https://developer.android.com/develop/ui/compose/text/style-paragraph
             //https://developer.android.com/develop/ui/compose/layouts/basics
             Text(
-                text = "Meditation Music",
+                text = "Guided Meditation",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start,
@@ -367,6 +369,28 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
                         )
                     }
                 }
+            }
+            if (expanded) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "This is 'The Tension Release Meditation' by Vidyamala Burch, Breathworks",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "For more you can visit The Free Mindfulness Project at https://www.freemindfulness.org/download",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = {expanded = !expanded},
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = if (expanded) "Hide Details" else "Show Details",
+                    fontSize = 20.sp
+                )
             }
         }
     }
