@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,7 +75,23 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
 
-    Scaffold() { padding ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("My Tasks", style = MaterialTheme.typography.headlineLarge) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            )
+        },
+        bottomBar =  { BottomNavigationBar(currentRoute = Screen.Tasks.route) },
+        containerColor = MaterialTheme.colorScheme.background
+        ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -116,7 +135,7 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.surface
     ) {
         Row(
             modifier = Modifier

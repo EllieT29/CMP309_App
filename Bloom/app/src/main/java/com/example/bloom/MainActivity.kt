@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -39,12 +38,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,7 +52,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -65,8 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -75,16 +70,6 @@ import com.example.bloom.network.QuoteViewModel
 import com.example.bloom.ui.theme.BloomTheme
 import kotlin.getValue
 
-
-// Sealed class to define the screens in the app
-sealed class Screen(val route: String, val icon: ImageVector, val title: String) {
-    object Test : Screen("test", Icons.Filled.Menu, "Test")
-}
-
-// List of items for the bottom navigation bar
-val bottomNavItems = listOf(
-    Screen.Test,
-)
 class MainActivity : ComponentActivity() {
 
     private val viewModel: TaskViewModel by viewModels()
@@ -130,7 +115,6 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateServi
     //Remember the scroll state
     val scrollState = rememberScrollState()
 
-
     //Get number of completed tasks
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
@@ -148,16 +132,16 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateServi
         },
         bottomBar = {
             // Bottom navigation bar
-            BottomNavigationBar(navController = navController)
+            BottomNavigationBar(currentRoute = Screen.Home.route)
         }
     ) { innerPadding ->
         // NavHost for navigating between screens
         NavHost(
-            navController = navController, startDestination = Screen.Test.route,
+            navController = navController, startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             // Composable for the Test screen
-            composable(Screen.Test.route) {
+            composable(Screen.Home.route) {
 
                 Column(
                     modifier = Modifier
@@ -176,8 +160,6 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateServi
                     Spacer(modifier = Modifier.height(15.dp))
 
                     DailyQuote(modifier = Modifier, quoteViewModel = viewModel())
-
-                    Greeting()
                 }
             }
         }
@@ -205,6 +187,9 @@ fun TopBar(navController: NavController) {
             fontWeight = FontWeight.Bold,
             fontSize = 55.sp)
                 },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.secondary// Background color
+        ),
         navigationIcon = {
             // Show the back button if we're not on a top-level screen.
             if (!isTopLevelDestination) {
@@ -229,20 +214,6 @@ fun TopBar(navController: NavController) {
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false }
             ) {
-                // Dropdown menu item for Movies
-                DropdownMenuItem(
-                    text = { Text("Test") },
-                    onClick = {
-                        navController.navigate(Screen.Test.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        menuExpanded = false
-                    }
-                )
                 // Dropdown menu item for Journal
                 DropdownMenuItem(
                     text = { Text("Journal") },
@@ -267,35 +238,6 @@ fun TopBar(navController: NavController) {
     )
 }
 
-@Composable
-fun BottomNavigationBar(navController: NavController) {
-    val bottomBarRoutes = setOf(Screen.Test.route)
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-    if (currentDestination?.route in bottomBarRoutes) {
-        NavigationBar {
-            bottomNavItems.forEach { screen ->
-                NavigationBarItem(
-                    icon = { Icon(screen.icon, contentDescription = null) },
-                    label = { Text(screen.title) },
-                    selected = currentDestination?.hierarchy?.any {
-                        it.route == screen.route
-                    } == true,
-                    onClick = {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    })
-            }
-        }
-    }
-}
-
-
 // Used GeeksforGeeks for using services to play music - https://www.geeksforgeeks.org/kotlin/services-in-android-using-jetpack-compose/
 @Composable
 fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: MeditateService?) {
@@ -306,7 +248,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Surface(
-        color = MaterialTheme.colorScheme.secondary,
+        color = MaterialTheme.colorScheme.surface,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -413,7 +355,7 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier
             .padding(16.dp)
@@ -462,7 +404,7 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
     quoteViewModel.fetchQuotes()
 
     Surface(
-        color = MaterialTheme.colorScheme.secondary,
+        color = MaterialTheme.colorScheme.surface,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -514,18 +456,3 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
 
 }
 
-
-@Composable
-fun Greeting() {
-    Text(
-        text = "Hello there!",
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BloomTheme {
-        Greeting()
-    }
-}
