@@ -19,9 +19,16 @@ class MeditateService : Service() {
     inner class LocalBinder : Binder() {
         fun getService(): MeditateService = this@MeditateService
     }
-
     override fun onBind(intent: Intent?): IBinder {
         return binder
+    }
+
+    fun isPlaying(): Boolean {
+        return player?.isPlaying ?: false
+    }
+
+    fun isStarted(): Boolean{
+        return player != null
     }
 
     fun play() {
