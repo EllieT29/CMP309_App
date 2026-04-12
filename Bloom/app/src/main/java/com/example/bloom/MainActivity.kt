@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -246,6 +247,14 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
     var isStarted by remember { mutableStateOf(false) }
 
     var expanded by rememberSaveable { mutableStateOf(false) }
+
+    //https://dev.to/atif_rehman_dec1a8f2103de/mastering-launched-effect-in-jetpack-compose-what-why-how-3kh1
+    LaunchedEffect(music) {
+        music?.let{
+            isPlaying = it.isPlaying()
+            isStarted = it.isStarted()
+        }
+    }
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
