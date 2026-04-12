@@ -1,8 +1,11 @@
 package com.example.bloom
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,12 +13,15 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +29,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -80,19 +89,41 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: TaskViewModel by viewModels()
 
+    private var meditateService by mutableStateOf<MeditateService?>(null)
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MeditateService.LocalBinder
+            meditateService = binder.getService()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            meditateService = null
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            // Bind to the music service
+            val intent = Intent(this, MeditateService::class.java)
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
             BloomTheme {
-                    MyApp(modifier = Modifier.fillMaxSize(), viewModel = viewModel)
+                    MyApp(modifier = Modifier.fillMaxSize(),
+                        viewModel = viewModel,
+                        meditateService)
             }
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindService(connection)
     }
 }
 
 @Composable
-fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
+fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateService: MeditateService?) {
     // Remember the NavController
     val navController = rememberNavController()
 
@@ -136,7 +167,7 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel) {
                 ) {
                     Flower(numCompletedTasks)
 
-                    MeditateMusic(context = LocalContext.current)
+                    MeditateMusic(context = LocalContext.current, music = meditateService)
 
                     Spacer(modifier = Modifier.height(15.dp))
 
@@ -267,12 +298,10 @@ fun BottomNavigationBar(navController: NavController) {
 
 // Used GeeksforGeeks for using services to play music - https://www.geeksforgeeks.org/kotlin/services-in-android-using-jetpack-compose/
 @Composable
-fun MeditateMusic(modifier: Modifier = Modifier, context: Context) {
+fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: MeditateService?) {
 
-    val serviceStatus = remember {
-        mutableStateOf(MeditateService.isPlaying)
-    }
-    val buttonValue = if (serviceStatus.value) "Stop" else "Play"
+    var isPlaying by remember { mutableStateOf(false) }
+    var isStarted by remember { mutableStateOf(false) }
 
     Surface(
         color = MaterialTheme.colorScheme.secondary,
@@ -292,28 +321,52 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context) {
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = {
-                    if (serviceStatus.value) {
-                        // service already running
-                        // stop the service
-                        serviceStatus.value = !serviceStatus.value
-                        context.stopService(Intent(context, MeditateService::class.java))
-
-                    } else {
-                        // service not running start service.
-                        serviceStatus.value = !serviceStatus.value
-                        // starting the service
-                        context.startService(Intent(context, MeditateService::class.java))
-                    }
-                },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = buttonValue,
-                    modifier = Modifier.padding(10.dp),
-                    fontSize = 20.sp
-                )
+                IconButton(
+                    onClick = {
+                        isPlaying = !isPlaying
+                        if (isPlaying) {
+                            isStarted = true
+                            music?.play()
+                        } else {
+                            music?.pause()
+                        }
+                    },
+                ) {
+                    if (isPlaying) {
+                        Icon(
+                            Icons.Filled.Pause,
+                            contentDescription = "Pause",
+                            modifier = Modifier.size(60.dp)
+                        )
+                    } else {
+                        Icon(
+                            Icons.Filled.PlayArrow,
+                            contentDescription = "Play",
+                            modifier = Modifier.size(60.dp)
+                        )
+                    }
+                }
+
+                if (isStarted) {
+                    IconButton(
+                        onClick = {
+                            music?.stop()
+                            isPlaying = false
+                            isStarted = false
+                        },
+                    ) {
+                        Icon(
+                            Icons.Filled.Stop,
+                            contentDescription = "Stop",
+                            modifier = Modifier.size(60.dp)
+                        )
+                    }
+                }
             }
         }
     }
