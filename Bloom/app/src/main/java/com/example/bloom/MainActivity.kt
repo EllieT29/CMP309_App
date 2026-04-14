@@ -67,13 +67,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.bloom.network.ApiSecurityManager
 import com.example.bloom.network.QuoteViewModel
 import com.example.bloom.ui.theme.BloomTheme
 import kotlin.getValue
-
+import com.example.bloom.network.RetrofitClient
 class MainActivity : ComponentActivity() {
 
     private val viewModel: TaskViewModel by viewModels()
+
+    //Used Google gemini for getting api key using the security manager
+    private val securityManager by lazy { ApiSecurityManager(applicationContext) }
 
     private var meditateService by mutableStateOf<MeditateService?>(null)
 
@@ -90,6 +94,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //Initialize the Security Manager inside the RetrofitClient
+        RetrofitClient.init(applicationContext)
+
+        //Save the key (This encrypts it using Keystore via SecurityManager)
+        securityManager.saveApiKey(BuildConfig.API_KEY)
+
+
         enableEdgeToEdge()
         setContent {
             // Bind to the music service
@@ -410,7 +422,9 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
 @Composable
 fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = viewModel()) {
 
-    quoteViewModel.fetchQuotes()
+    LaunchedEffect(Unit) {
+        quoteViewModel.fetchQuotes()
+    }
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -464,4 +478,3 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
     }
 
 }
-
