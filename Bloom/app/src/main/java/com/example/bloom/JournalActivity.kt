@@ -49,12 +49,15 @@ import kotlin.getValue
 
 class JournalActivity : ComponentActivity() {
     private val viewModel: JournalViewModel by viewModels()
+    private lateinit var themeRepository: ThemeRepository
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BloomTheme() {
+            themeRepository = ThemeRepository(this)
+            BloomTheme(darkTheme = themeRepository.getTheme()) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {

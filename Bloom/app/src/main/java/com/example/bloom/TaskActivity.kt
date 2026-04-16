@@ -49,12 +49,15 @@ import kotlin.getValue
 
 class TaskActivity : ComponentActivity() {
     private val viewModel: TaskViewModel by viewModels()
+    private lateinit var themeRepository: ThemeRepository
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themeRepository = ThemeRepository(this)
         enableEdgeToEdge()
         setContent {
-            BloomTheme {
+            BloomTheme(darkTheme = themeRepository.getTheme()) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {

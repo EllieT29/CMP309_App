@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,20 +24,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -45,6 +50,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +82,8 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: TaskViewModel by viewModels()
 
+    private lateinit var themeRepository: ThemeRepository
+
     //Used Google gemini for getting api key using the security manager
     private val securityManager by lazy { ApiSecurityManager(applicationContext) }
 
@@ -101,16 +109,21 @@ class MainActivity : ComponentActivity() {
         //Save the key (This encrypts it using Keystore via SecurityManager)
         securityManager.saveApiKey(BuildConfig.API_KEY)
 
+        themeRepository = ThemeRepository(this)
 
         enableEdgeToEdge()
         setContent {
+            val isDarkMode = remember { mutableStateOf(themeRepository.getTheme()) }
             // Bind to the music service
             val intent = Intent(this, MeditateService::class.java)
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
-            BloomTheme {
+            BloomTheme(darkTheme = isDarkMode.value) {
                     MyApp(modifier = Modifier.fillMaxSize(),
                         viewModel = viewModel,
-                        meditateService)
+                        meditateService,
+                        themeRepository,
+                        isDarkMode
+                        )
             }
         }
     }
@@ -121,7 +134,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateService: MeditateService?) {
+fun MyApp(
+    modifier: Modifier = Modifier,
+    viewModel: TaskViewModel,
+    meditateService: MeditateService?,
+    themeRepository: ThemeRepository,
+    isDarkMode: MutableState<Boolean>) {
     // Remember the NavController
     val navController = rememberNavController()
 
@@ -141,7 +159,7 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateServi
         modifier = modifier,
         topBar = {
             // Top app bar
-            TopBar(navController = navController)
+            TopBar(navController = navController, isDarkMode,  themeRepository)
         },
         bottomBar = {
             // Bottom navigation bar
@@ -183,7 +201,7 @@ fun MyApp(modifier: Modifier = Modifier, viewModel: TaskViewModel, meditateServi
 // Composable for the top app bar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController) {
+fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, themeRepository: ThemeRepository = ThemeRepository(LocalContext.current)) {
     var menuExpanded by remember { mutableStateOf(false) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -215,6 +233,22 @@ fun TopBar(navController: NavController) {
             }
         },
         actions = {
+            //https://www.geeksforgeeks.org/kotlin/icon-toggle-button-in-android-using-jetpack-compose/
+            IconToggleButton (
+                checked = isDarkMode.value,
+                onCheckedChange = {
+                    isDarkMode.value = it
+                    themeRepository.saveTheme(it)
+                },
+                modifier = Modifier.background(color = MaterialTheme.colorScheme.background, shape = CircleShape),
+            ){
+                Icon(
+                    imageVector = if (isDarkMode.value) Icons.Filled.WbSunny else Icons.Filled.DarkMode,
+                    contentDescription = "Icon",
+                    modifier = Modifier.size(30.dp)
+                )
+
+            }
             // More icon button to expand the dropdown menu
             IconButton(onClick = { menuExpanded = !menuExpanded }) {
                 Icon(
