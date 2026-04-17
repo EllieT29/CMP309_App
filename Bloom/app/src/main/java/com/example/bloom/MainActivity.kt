@@ -1,5 +1,8 @@
 package com.example.bloom
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -78,6 +81,10 @@ import com.example.bloom.network.QuoteViewModel
 import com.example.bloom.ui.theme.BloomTheme
 import kotlin.getValue
 import com.example.bloom.network.RetrofitClient
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+
 class MainActivity : ComponentActivity() {
 
     private val viewModel: TaskViewModel by viewModels()
@@ -100,6 +107,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -111,6 +119,14 @@ class MainActivity : ComponentActivity() {
 
         themeRepository = ThemeRepository(this)
 
+        val notificationChannel= NotificationChannel(
+            "task_notification",
+            "Task",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        val notificationManager=getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(notificationChannel)
+
         enableEdgeToEdge()
         setContent {
             val isDarkMode = remember { mutableStateOf(themeRepository.getTheme()) }
@@ -118,12 +134,25 @@ class MainActivity : ComponentActivity() {
             val intent = Intent(this, MeditateService::class.java)
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
             BloomTheme(darkTheme = isDarkMode.value) {
-                    MyApp(modifier = Modifier.fillMaxSize(),
-                        viewModel = viewModel,
-                        meditateService,
-                        themeRepository,
-                        isDarkMode
-                        )
+
+                val postNotificationPermission= rememberPermissionState(
+                    permission = Manifest.permission.POST_NOTIFICATIONS)
+
+                val notificationService=NotificationService(this)
+
+                LaunchedEffect(Unit){
+                    if(!postNotificationPermission.status.isGranted){
+                        postNotificationPermission.launchPermissionRequest()
+                    }
+                }
+
+                MyApp(modifier = Modifier.fillMaxSize(),
+                    viewModel = viewModel,
+                    meditateService,
+                    themeRepository,
+                    isDarkMode,
+                    notificationService
+                    )
             }
         }
     }
@@ -139,7 +168,9 @@ fun MyApp(
     viewModel: TaskViewModel,
     meditateService: MeditateService?,
     themeRepository: ThemeRepository,
-    isDarkMode: MutableState<Boolean>) {
+    isDarkMode: MutableState<Boolean>,
+    notificationService: NotificationService
+) {
     // Remember the NavController
     val navController = rememberNavController()
 
@@ -149,10 +180,22 @@ fun MyApp(
     //Get number of completed tasks
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
+    LaunchedEffect(numCompletedTasks) {
+        if (numCompletedTasks == 5) {
+            notificationService.showTaskCompletedNotification()
+        }
+    }
+
     //Get details of first incomplete task
     val firstIncompleteTask by viewModel.firstIncompleteTask.collectAsState(initial = null)
     val currentTask = firstIncompleteTask?.title?: "Well done! You have completed all your tasks!"
     val currentDescription = firstIncompleteTask?.description?: "Take a break and be proud :)"
+
+    LaunchedEffect(firstIncompleteTask?.id) { // Trigger when the ID of the current task changes
+        firstIncompleteTask?.let { task ->
+            notificationService.showNewTaskNotification(task.title)
+        }
+    }
 
     // Scaffold provides a framework for the app's layout
     Scaffold(
