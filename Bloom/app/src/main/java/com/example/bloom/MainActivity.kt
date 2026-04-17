@@ -529,7 +529,7 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
             }
             quoteViewModel.errorMessage?.let {
                 Text(
-                    text = it,
+                    text = "Make sure you have an internet connection",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
