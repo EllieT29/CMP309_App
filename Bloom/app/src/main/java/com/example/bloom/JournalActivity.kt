@@ -54,9 +54,9 @@ class JournalActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themeRepository = ThemeRepository(this)
         enableEdgeToEdge()
         setContent {
-            themeRepository = ThemeRepository(this)
             BloomTheme(darkTheme = themeRepository.getTheme()) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

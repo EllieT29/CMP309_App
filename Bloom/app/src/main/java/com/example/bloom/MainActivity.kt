@@ -91,8 +91,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var themeRepository: ThemeRepository
 
-    //Used Google gemini for getting api key using the security manager
-    private val securityManager by lazy { ApiSecurityManager(applicationContext) }
+    // Initialise securityManager in onCreate or use a lazy property that is accessed after onCreate
+    private lateinit var securityManager: ApiSecurityManager
 
     private var meditateService by mutableStateOf<MeditateService?>(null)
 
@@ -113,6 +113,7 @@ class MainActivity : ComponentActivity() {
 
         //Initialize the Security Manager inside the RetrofitClient
         RetrofitClient.init(applicationContext)
+        securityManager = ApiSecurityManager(applicationContext)
 
         //Save the key (This encrypts it using Keystore via SecurityManager)
         securityManager.saveApiKey(BuildConfig.API_KEY)
@@ -151,7 +152,6 @@ class MainActivity : ComponentActivity() {
                     meditateService,
                     themeRepository,
                     isDarkMode,
-                    notificationService
                     )
             }
         }
@@ -169,7 +169,6 @@ fun MyApp(
     meditateService: MeditateService?,
     themeRepository: ThemeRepository,
     isDarkMode: MutableState<Boolean>,
-    notificationService: NotificationService
 ) {
     // Remember the NavController
     val navController = rememberNavController()
@@ -180,22 +179,10 @@ fun MyApp(
     //Get number of completed tasks
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
-    LaunchedEffect(numCompletedTasks) {
-        if (numCompletedTasks == 5) {
-            notificationService.showTaskCompletedNotification()
-        }
-    }
-
     //Get details of first incomplete task
     val firstIncompleteTask by viewModel.firstIncompleteTask.collectAsState(initial = null)
     val currentTask = firstIncompleteTask?.title?: "Well done! You have completed all your tasks!"
     val currentDescription = firstIncompleteTask?.description?: "Take a break and be proud :)"
-
-    LaunchedEffect(firstIncompleteTask?.id) { // Trigger when the ID of the current task changes
-        firstIncompleteTask?.let { task ->
-            notificationService.showNewTaskNotification(task.title)
-        }
-    }
 
     // Scaffold provides a framework for the app's layout
     Scaffold(

@@ -1,5 +1,7 @@
 package com.example.bloom
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -55,15 +57,29 @@ class TaskActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         themeRepository = ThemeRepository(this)
+
+        val notificationChannel= NotificationChannel(
+            "task_notification",
+            "Task",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        val notificationManager=getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(notificationChannel)
+
+
         enableEdgeToEdge()
         setContent {
             BloomTheme(darkTheme = themeRepository.getTheme()) {
+
+                val notificationService=NotificationService(this)
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     TaskScreen(
                         viewModel = viewModel,
-                        onBack = { finish() }
+                        onBack = { finish() },
+                        notificationService
                     )
                 }
             }
@@ -73,10 +89,10 @@ class TaskActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
+fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService: NotificationService) {
+
     val tasks by viewModel.allTasks.collectAsState(initial = emptyList())
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
-
 
     Scaffold(
         topBar = {
@@ -111,7 +127,27 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit) {
                 items(tasks) { task ->
                     TaskItem(
                         task = task,
-                        onToggle = { viewModel.update(task.copy(isComplete = !task.isComplete)) },
+                        onToggle = {
+                            viewModel.update(task.copy(isComplete = !task.isComplete))
+
+                            val isNowComplete = !task.isComplete
+                            viewModel.update(task.copy(isComplete = isNowComplete))
+
+                            if (isNowComplete) {
+
+                                if (numCompletedTasks + 1 >= 5) {
+                                    notificationService.showTaskCompletedNotification()
+                                } else {
+
+                                    val nextIncomplete = tasks.firstOrNull {
+                                        it.id != task.id && !it.isComplete
+                                    }
+                                    if (nextIncomplete != null) {
+                                        notificationService.showNewTaskNotification(nextIncomplete.title)
+                                    }
+                                }
+                            }
+                       },
                     )
                 }
             }
