@@ -15,7 +15,7 @@ Entries can also be deleted.
 
 ## Meditation
 On the 'Home' screen a meditation track is displayed, the track can be played using the play icon, paused using the pause icon and stopped using the stop icon. 
-The meditation track goes talks through a meditation session. 
+The meditation track talks through a meditation session. 
 
 ## Daily Quote
 On the bottom of the 'Home' screen a daily quote can be found. This updates everyday and requires the phone to be connected to the internet. 
