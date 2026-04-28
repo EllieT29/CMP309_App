@@ -70,6 +70,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -84,6 +87,9 @@ import com.example.bloom.network.RetrofitClient
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.example.bloom.network.ConnectivityObserver
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -95,6 +101,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var securityManager: ApiSecurityManager
 
     private var meditateService by mutableStateOf<MeditateService?>(null)
+
+    private val networkObserver by lazy { ConnectivityObserver(applicationContext) }
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -110,6 +118,14 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
+                networkObserver.isConnectedFlow.collectLatest { isConnected ->
+                    print("NetworkStatus: $isConnected")
+                }
+            }
+        }
 
         //Initialize the Security Manager inside the RetrofitClient
         RetrofitClient.init(applicationContext)
@@ -152,6 +168,7 @@ class MainActivity : ComponentActivity() {
                     meditateService,
                     themeRepository,
                     isDarkMode,
+                    networkObserver
                     )
             }
         }
@@ -169,6 +186,7 @@ fun MyApp(
     meditateService: MeditateService?,
     themeRepository: ThemeRepository,
     isDarkMode: MutableState<Boolean>,
+    networkObserver: ConnectivityObserver
 ) {
     // Remember the NavController
     val navController = rememberNavController()
@@ -220,7 +238,7 @@ fun MyApp(
 
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    DailyQuote(modifier = Modifier, quoteViewModel = viewModel())
+                    DailyQuote(modifier = Modifier, quoteViewModel = viewModel(), connectivityObserver = networkObserver, context = LocalContext.current)
                 }
             }
         }
@@ -484,10 +502,24 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
 }
 
 @Composable
-fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = viewModel()) {
+fun DailyQuote(
+    modifier: Modifier = Modifier,
+    quoteViewModel: QuoteViewModel = viewModel(),
+    connectivityObserver: ConnectivityObserver,
+    context: Context
+) {
 
-    LaunchedEffect(Unit) {
-        quoteViewModel.fetchQuotes()
+    val viewModel = viewModel<MainViewModel> {
+        MainViewModel(ConnectivityObserver(context))
+    }
+    val isConnected by viewModel.isConnected.collectAsState()
+
+    print("NetworkStatus:$isConnected")
+
+    LaunchedEffect(isConnected) {
+        if (isConnected) {
+            quoteViewModel.fetchQuotes()
+        }
     }
 
     Surface(
@@ -507,35 +539,43 @@ fun DailyQuote(modifier: Modifier = Modifier, quoteViewModel: QuoteViewModel = v
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (quoteViewModel.isLoading) {
+            if(!isConnected) {
                 Text(
-                    "Loading...",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
-                )
-            }
-            quoteViewModel.errorMessage?.let {
-                Text(
-                    text = "Make sure you have an internet connection",
-                    color = MaterialTheme.colorScheme.error,
+                    text = "You are currently offline. Connect to see today's quote.",
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
+            }else {
+                if (quoteViewModel.isLoading) {
+                    Text(
+                        "Loading...",
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                quoteViewModel.errorMessage?.let {
+                    Text(
+                        text = "Error Try again",
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
 
-            quoteViewModel.quotes.forEach { quoteItem ->
-                Text(
-                    text = "\"${quoteItem.quote}\"",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(15.dp))
-                Text(
-                    text = "- ${quoteItem.author}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
+                quoteViewModel.quotes.forEach { quoteItem ->
+                    Text(
+                        text = "\"${quoteItem.quote}\"",
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Text(
+                        text = "- ${quoteItem.author}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
 
-                )
+                    )
+                }
             }
 
         }
