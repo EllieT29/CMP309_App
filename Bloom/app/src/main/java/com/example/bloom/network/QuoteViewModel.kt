@@ -14,8 +14,10 @@ class QuoteViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
+    //Initialising the API service
     private val apiService = RetrofitClient.instance
 
+    //Fetching the quotes and handling errors
     fun fetchQuotes() {
         viewModelScope.launch {
             isLoading = true

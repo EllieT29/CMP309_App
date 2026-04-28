@@ -66,7 +66,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,17 +92,22 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    //Initialising the viewModel for tasks
     private val viewModel: TaskViewModel by viewModels()
 
+    //Initialising the theme repository
     private lateinit var themeRepository: ThemeRepository
 
-    // Initialise securityManager in onCreate or use a lazy property that is accessed after onCreate
+    // Initialise securityManager
     private lateinit var securityManager: ApiSecurityManager
 
+    // Initialise music service
     private var meditateService by mutableStateOf<MeditateService?>(null)
 
+    //Initialise network observer
     private val networkObserver by lazy { ConnectivityObserver(applicationContext) }
 
+    //Service connection
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MeditateService.LocalBinder
@@ -119,29 +123,36 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //Launch a coroutine tied to the Activity lifecycle
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
+                //Collect updates from a Flow that releases network connectivity status
                 networkObserver.isConnectedFlow.collectLatest { isConnected ->
                     print("NetworkStatus: $isConnected")
                 }
             }
         }
 
-        //Initialize the Security Manager inside the RetrofitClient
+        //Initialise the Security Manager inside the RetrofitClient
         RetrofitClient.init(applicationContext)
         securityManager = ApiSecurityManager(applicationContext)
 
-        //Save the key (This encrypts it using Keystore via SecurityManager)
+        //Save the API key to the Security Manager
         securityManager.saveApiKey(BuildConfig.API_KEY)
 
+        //Initialise the theme repository
         themeRepository = ThemeRepository(this)
 
+        //Create a notification channel
         val notificationChannel= NotificationChannel(
             "task_notification",
             "Task",
             NotificationManager.IMPORTANCE_HIGH
         )
+        //Get the system NotificationManager service
         val notificationManager=getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        //Register the notification channel with the system
         notificationManager.createNotificationChannel(notificationChannel)
 
         enableEdgeToEdge()
@@ -152,11 +163,11 @@ class MainActivity : ComponentActivity() {
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
             BloomTheme(darkTheme = isDarkMode.value) {
 
+                //Permission to post notifications
                 val postNotificationPermission= rememberPermissionState(
                     permission = Manifest.permission.POST_NOTIFICATIONS)
 
-                val notificationService=NotificationService(this)
-
+                //Launch the permission request if not granted
                 LaunchedEffect(Unit){
                     if(!postNotificationPermission.status.isGranted){
                         postNotificationPermission.launchPermissionRequest()
@@ -168,11 +179,11 @@ class MainActivity : ComponentActivity() {
                     meditateService,
                     themeRepository,
                     isDarkMode,
-                    networkObserver
                     )
             }
         }
     }
+    //Destroy amd unbind music service
     override fun onDestroy() {
         super.onDestroy()
         unbindService(connection)
@@ -186,7 +197,6 @@ fun MyApp(
     meditateService: MeditateService?,
     themeRepository: ThemeRepository,
     isDarkMode: MutableState<Boolean>,
-    networkObserver: ConnectivityObserver
 ) {
     // Remember the NavController
     val navController = rememberNavController()
@@ -219,7 +229,7 @@ fun MyApp(
             navController = navController, startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Composable for the Test screen
+            // Composable for the Home screen
             composable(Screen.Home.route) {
 
                 Column(
@@ -228,17 +238,18 @@ fun MyApp(
                     .padding(16.dp)
                     .verticalScroll(state = scrollState)
                 ) {
-                    Flower(numCompletedTasks)
+                    Flower(numCompletedTasks)//Display flower composable
 
-                    MeditateMusic(context = LocalContext.current, music = meditateService)
-
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    CurrentTask(task = currentTask, description = currentDescription)
+                    MeditateMusic(music = meditateService)//Display meditate service composable
 
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    DailyQuote(modifier = Modifier, quoteViewModel = viewModel(), connectivityObserver = networkObserver, context = LocalContext.current)
+                    CurrentTask(task = currentTask, description = currentDescription)//Display current task composable
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    //Display daily quote composable
+                    DailyQuote(modifier = Modifier, quoteViewModel = viewModel(), context = LocalContext.current)
                 }
             }
         }
@@ -280,7 +291,7 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
                 }
             }
         },
-        actions = {
+        actions = {//Dark mode toggle button
             //https://www.geeksforgeeks.org/kotlin/icon-toggle-button-in-android-using-jetpack-compose/
             IconToggleButton (
                 checked = isDarkMode.value,
@@ -335,8 +346,9 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
 
 // Used GeeksforGeeks for using services to play music - https://www.geeksforgeeks.org/kotlin/services-in-android-using-jetpack-compose/
 @Composable
-fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: MeditateService?) {
+fun MeditateMusic(modifier: Modifier = Modifier, music: MeditateService?) {
 
+    //Remeber state of the music i.e. is playing or is started
     var isPlaying by remember { mutableStateOf(false) }
     var isStarted by remember { mutableStateOf(false) }
 
@@ -344,9 +356,9 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
 
     //https://dev.to/atif_rehman_dec1a8f2103de/mastering-launched-effect-in-jetpack-compose-what-why-how-3kh1
     LaunchedEffect(music) {
-        music?.let{
-            isPlaying = it.isPlaying()
-            isStarted = it.isStarted()
+        music?.let{//If music is not null, update UI state based on its current status
+            isPlaying = it.isPlaying()//Check if music is currently playing
+            isStarted = it.isStarted()//Check if music has started
         }
     }
 
@@ -373,7 +385,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
+                IconButton(//Buttons for playing, pausing and stopping mediation based on state
                     onClick = {
                         isPlaying = !isPlaying
                         if (isPlaying) {
@@ -415,7 +427,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, context: Context, music: Medita
                     }
                 }
             }
-            if (expanded) {
+            if (expanded) {//Details about meditation
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
                     text = "This is 'The Tension Release Meditation' by Vidyamala Burch, Breathworks",
@@ -474,13 +486,13 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(24.dp))
-            Text(
+            Text(//Displaying the current task
                 text = task,
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(24.dp))
-            if (expanded) {
+            if (expanded) {//If button is clicked, display details of the current task
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
                     text = description,
@@ -488,7 +500,7 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
                 )
                 Spacer(modifier = Modifier.height(15.dp))
             }
-            Button(
+            Button(//Button to show more details
                 onClick = {expanded = !expanded},
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
@@ -505,17 +517,19 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
 fun DailyQuote(
     modifier: Modifier = Modifier,
     quoteViewModel: QuoteViewModel = viewModel(),
-    connectivityObserver: ConnectivityObserver,
     context: Context
 ) {
 
+    //Create MainViewModel and pass a ConnectivityObserver to it
     val viewModel = viewModel<MainViewModel> {
         MainViewModel(ConnectivityObserver(context))
     }
+    //Get the current network connectivity status
     val isConnected by viewModel.isConnected.collectAsState()
 
     print("NetworkStatus:$isConnected")
 
+    //Launch a coroutine to fetch quotes when the internet is available
     LaunchedEffect(isConnected) {
         if (isConnected) {
             quoteViewModel.fetchQuotes()
@@ -539,22 +553,22 @@ fun DailyQuote(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            if(!isConnected) {
+            if(!isConnected) {//If offline then display message to connect to network
                 Text(
                     text = "You are currently offline. Connect to see today's quote.",
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-            }else {
-                if (quoteViewModel.isLoading) {
+            }else {//If online
+                if (quoteViewModel.isLoading) {//If loading then display loading message
                     Text(
                         "Loading...",
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center
                     )
                 }
-                quoteViewModel.errorMessage?.let {
+                quoteViewModel.errorMessage?.let {//If error then display error message
                     Text(
                         text = "Error Try again",
                         style = MaterialTheme.typography.headlineSmall,
@@ -562,7 +576,7 @@ fun DailyQuote(
                     )
                 }
 
-                quoteViewModel.quotes.forEach { quoteItem ->
+                quoteViewModel.quotes.forEach { quoteItem ->//Display quote and author
                     Text(
                         text = "\"${quoteItem.quote}\"",
                         style = MaterialTheme.typography.headlineSmall,

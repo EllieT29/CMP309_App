@@ -17,9 +17,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 //Used Medium for connectivity Observer
 // https://medium.com/@KaushalVasava/how-observe-internet-in-android-a-new-way-using-flow-8304a33b4717
 class ConnectivityObserver(context: Context) {
+
+    //Initialising connectivity manager using getSystemService
     private var connectivityManager: ConnectivityManager? =
         context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 
+    //Creating a network callback
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     val isConnectedFlow: Flow<Boolean>  = callbackFlow {
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
@@ -31,14 +34,17 @@ class ConnectivityObserver(context: Context) {
                 }
             }
 
+            //Called when a network is lost
             override fun onLost(network: Network) {
                 trySend(false)
             }
 
+            //Called when network is unavailable
             override fun onUnavailable() {
                 trySend(false)
             }
 
+            //Called when capabilities of the network changes
             override fun onCapabilitiesChanged(
                 network: Network,
                 capabilities: NetworkCapabilities
@@ -52,6 +58,7 @@ class ConnectivityObserver(context: Context) {
             }
         }
 
+        //Creating a network Request
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NET_CAPABILITY_INTERNET)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -59,6 +66,7 @@ class ConnectivityObserver(context: Context) {
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build()
 
+        //Registering the network callback
         connectivityManager?.registerNetworkCallback(networkRequest, networkCallback)
 
         awaitClose {

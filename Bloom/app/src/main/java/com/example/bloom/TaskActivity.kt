@@ -50,27 +50,33 @@ import kotlin.getValue
 
 
 class TaskActivity : ComponentActivity() {
-    private val viewModel: TaskViewModel by viewModels()
-    private lateinit var themeRepository: ThemeRepository
 
+    //Initialising the viewModel for tasks
+    private val viewModel: TaskViewModel by viewModels()
+    //Initialising the theme repository
+    private lateinit var themeRepository: ThemeRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Initialise the theme repository
         themeRepository = ThemeRepository(this)
 
+        //Create a notification channel for tasks
         val notificationChannel= NotificationChannel(
             "task_notification",
             "Task",
             NotificationManager.IMPORTANCE_HIGH
         )
+        //Get the system NotificationManager service
         val notificationManager=getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        //Register the notification channel with the system
         notificationManager.createNotificationChannel(notificationChannel)
-
 
         enableEdgeToEdge()
         setContent {
             BloomTheme(darkTheme = themeRepository.getTheme()) {
 
+                //Create a notification service
                 val notificationService=NotificationService(this)
 
                 Surface(
@@ -91,11 +97,12 @@ class TaskActivity : ComponentActivity() {
 @Composable
 fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService: NotificationService) {
 
+    //Get all tasks and the number of completed tasks
     val tasks by viewModel.allTasks.collectAsState(initial = emptyList())
     val numCompletedTasks by viewModel.completedTaskCount.collectAsState(initial = 0)
 
     Scaffold(
-        topBar = {
+        topBar = {//Top app bar
             TopAppBar(
                 title = { Text("My Tasks", style = MaterialTheme.typography.headlineLarge) },
                 navigationIcon = {
@@ -108,7 +115,7 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService
                 )
             )
         },
-        bottomBar =  { BottomNavigationBar(currentRoute = Screen.Tasks.route) },
+        bottomBar =  { BottomNavigationBar(currentRoute = Screen.Tasks.route) },//Bottom navigation bar
         containerColor = MaterialTheme.colorScheme.background
         ) { padding ->
         Column(
@@ -117,30 +124,31 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            LazyColumn(
+            LazyColumn(//Lazy column for tasks
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(1f),
             ) {
-                item{
+                item{//Flower composable
                     Flower(numCompletedTasks)
                 }
-                items(tasks) { task ->
+                items(tasks) { task ->//Display each task
                     TaskItem(
                         task = task,
-                        onToggle = {
+                        onToggle = {//Toggle the task's completion status
+
                             val isNowComplete = !task.isComplete
-                            viewModel.update(task.copy(isComplete = !task.isComplete))
+                            viewModel.update(task.copy(isComplete = !task.isComplete))//Update the task in the database
 
-                            if (isNowComplete) {
+                            if (isNowComplete) {//If the task is now complete
 
-                                if (numCompletedTasks + 1 >= 5) {
+                                if (numCompletedTasks + 1 >= 5) {//If all tasks are complete show completed task notification
                                     notificationService.showTaskCompletedNotification()
                                 } else {
 
-                                    val nextIncomplete = tasks.firstOrNull {
+                                    val nextIncomplete = tasks.firstOrNull {//Find the next incomplete task
                                         it.id != task.id && !it.isComplete
                                     }
-                                    if (nextIncomplete != null) {
+                                    if (nextIncomplete != null) {//If there is a next incomplete task show new task notification
                                         notificationService.showNewTaskNotification(nextIncomplete.title)
                                     }
                                 }
@@ -154,7 +162,7 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService
     }
 }
 
-
+//Task item composable
 @Composable
 fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
 
@@ -180,7 +188,7 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(
+            Checkbox(//Checkbox for task completion
                 checked = task.isComplete,
                 onCheckedChange = { onToggle() }
             )
@@ -190,11 +198,11 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
                     .padding(horizontal = 8.dp)
                     .padding(bottom = extraPadding.coerceAtLeast(0.dp))
             ) {
-                Text(
+                Text(//Displaying task title
                     text = task.title,
                     style = MaterialTheme.typography.headlineMedium
                 )
-                if (expanded) {
+                if (expanded) {//If expanded, display task description
                     Spacer(modifier = Modifier.height(15.dp))
                     Text(
                         text = task.description,
@@ -202,7 +210,7 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
                     )
                 }
             }
-            IconButton(onClick = { expanded = !expanded }) {
+            IconButton(onClick = { expanded = !expanded }) {//Button to expand task details
                 Icon(
                     Icons.Default.ArrowDropDown,
                     contentDescription = "Show More",

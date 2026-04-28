@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 
+//Flower composable for displaying the flower image
 @Composable
 fun Flower(count: Int){
 
+    //Showing the appropriate flower image based on the count
     val imageResource = when (count)
     {
         1 -> R.drawable.flower_1
@@ -17,6 +19,7 @@ fun Flower(count: Int){
         else -> R.drawable.flower_0
     }
 
+    //Displaying the flower image using the Image composable
     Image(
         painter = painterResource(imageResource),
         contentDescription = "Completed tasks"

@@ -5,12 +5,18 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import kotlin.random.Random
 
+// Used - https://medium.com/@kathankraithatha/notifications-with-jetpack-compose-3302f27e1348
+
+//Notification service for showing notifications
 class NotificationService (
     private val context: Context
 ){
+    //Get the notification manager
     private val notificationManager=context.getSystemService(NotificationManager::class.java)
 
+    //Show notification for task completion
     fun showTaskCompletedNotification(){
+        //Create the notification
         val notification= NotificationCompat.Builder(context,"task_notification")
             .setContentTitle("Your Flower has bloomed!")
             .setContentText("All tasks complete - have a look at your beautiful flower!")
@@ -19,21 +25,26 @@ class NotificationService (
             .setAutoCancel(true)
             .build()
 
+        //Show the notification
         notificationManager.notify(
             Random.nextInt(),
             notification
         )
     }
 
+    //Show notification for new task
     fun showNewTaskNotification(taskTitle:String){
+
+        //Create the notification
         val notification=NotificationCompat.Builder(context,"task_notification")
             .setContentTitle("Your New Task")
-            .setContentText("$taskTitle")
+            .setContentText(taskTitle)
             .setSmallIcon(R.drawable.task_icon)
             .setPriority(NotificationManager.IMPORTANCE_HIGH)
             .setAutoCancel(true)
             .build()
 
+        //Show the notification
         notificationManager.notify(Random.nextInt(),notification)
     }
 }

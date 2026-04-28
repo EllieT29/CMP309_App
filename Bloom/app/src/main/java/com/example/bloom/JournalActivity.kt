@@ -48,12 +48,18 @@ import java.util.Date
 import kotlin.getValue
 
 class JournalActivity : ComponentActivity() {
+
+    //Initialising the viewModel for journal
     private val viewModel: JournalViewModel by viewModels()
+
+    //Initialising the theme repository
     private lateinit var themeRepository: ThemeRepository
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //Initialising the theme repository
         themeRepository = ThemeRepository(this)
         enableEdgeToEdge()
         setContent {
@@ -71,14 +77,19 @@ class JournalActivity : ComponentActivity() {
     }
 }
 
+//Composable for layout of journal screen layout and functionality
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
+
+    //Getting all the journals from the viewModel
     val journals by viewModel.allJournals.collectAsState(initial = emptyList())
+
+    //State for the new note
     var newNote by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
+        topBar = {//Top Bar of screen
             TopAppBar(
                 title = { Text("Journal", style = MaterialTheme.typography.headlineLarge) },
                 navigationIcon = {
@@ -89,14 +100,14 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.secondary
                 ),
-                actions = {
+                actions = {//Button for clearing all journals
                     IconButton(onClick = { viewModel.deleteAll() }) {
                         Icon(Icons.Default.Delete, contentDescription = "Clear All")
                     }
                 }
             )
         },
-        bottomBar =  { BottomNavigationBar(currentRoute = Screen.Journal.route) },
+        bottomBar =  { BottomNavigationBar(currentRoute = Screen.Journal.route) },//Bottom navigation bar
         ) { padding ->
         Column(
             modifier = Modifier
@@ -108,17 +119,17 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
+                OutlinedTextField(//Text field for user to input their entry
                     value = newNote,
                     onValueChange = { newNote = it },
                     label = { Text("Your Reflection") },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = {
+                Button(onClick = {//Button for adding the new entry
                     if (newNote.isNotBlank()) {
                         val current = System.currentTimeMillis()
-                        viewModel.insert(Journal(notes = newNote, entryDate = current))
+                        viewModel.insert(Journal(notes = newNote, entryDate = current))//Inserting the new entry into the database
                         newNote = ""
                     }
                 }) {
@@ -128,6 +139,7 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            //Lazy column for displaying all the entries
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(1f)
@@ -135,7 +147,7 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                 items(journals) { journal ->
                     JournalEntry(
                         journal = journal,
-                        onDelete = { viewModel.delete(journal) }
+                        onDelete = { viewModel.delete(journal) }//Deleting the entry when delete button is pressed
                     )
                 }
             }
@@ -147,6 +159,7 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
 fun JournalEntry(journal: Journal, onDelete: () -> Unit) {
 
     //Used https://medium.com/@atharvapajgade/working-with-date-objects-in-kotlin-e6af6cb9688c
+    //Formatting the current date
     val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
     val formattedDate = formatter.format(Date(journal.entryDate))
 
@@ -164,7 +177,7 @@ fun JournalEntry(journal: Journal, onDelete: () -> Unit) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            Text(//Displaying the entry date
                 text = "Entry Date:  $formattedDate",
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.headlineSmall
@@ -176,14 +189,14 @@ fun JournalEntry(journal: Journal, onDelete: () -> Unit) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            Text(//Displaying the entry text
                 text = journal.notes,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp),
                 style = MaterialTheme.typography.bodyLarge
             )
-            IconButton(onClick = onDelete) {
+            IconButton(onClick = onDelete) {//Button for deleting the entry
                 Icon(Icons.Default.Delete, contentDescription = "Delete")
             }
         }

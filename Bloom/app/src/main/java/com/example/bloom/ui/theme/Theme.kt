@@ -1,6 +1,5 @@
 package com.example.bloom.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+//Set dark colour scheme
 private val DarkColorScheme = darkColorScheme(
     primary = LightGrass,
     secondary = DarkPink,
@@ -27,6 +27,7 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = Color.White,
 )
 
+//Set light colour scheme
 private val LightColorScheme = lightColorScheme(
     primary = Grass,
     secondary = BabyPink,
@@ -45,20 +46,22 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun BloomTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    //Choose a color scheme based on the parameters
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
+        //If darkTheme is true, use the DarkColorScheme
         darkTheme -> DarkColorScheme
+        //If darkTheme is false, use the LightColorScheme
         else -> LightColorScheme
     }
 
+    //Apply the MaterialTheme with the chosen color scheme, typography, and content
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
