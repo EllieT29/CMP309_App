@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
@@ -12,8 +13,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val taskDao = AppDatabase.getDatabase(application).taskDao()
-        repository = TaskRepository(taskDao)
+        repository = TaskRepository(taskDao, application)
         allTasks = repository.allTasks
+        viewModelScope.launch {repository.checkAndResetTasks()}
     }
 
     fun update(task: Task) = viewModelScope.launch {

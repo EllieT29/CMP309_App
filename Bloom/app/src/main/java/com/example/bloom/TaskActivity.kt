@@ -128,10 +128,8 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService
                     TaskItem(
                         task = task,
                         onToggle = {
-                            viewModel.update(task.copy(isComplete = !task.isComplete))
-
                             val isNowComplete = !task.isComplete
-                            viewModel.update(task.copy(isComplete = isNowComplete))
+                            viewModel.update(task.copy(isComplete = !task.isComplete))
 
                             if (isNowComplete) {
 

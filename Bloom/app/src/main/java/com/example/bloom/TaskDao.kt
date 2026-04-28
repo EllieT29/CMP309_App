@@ -24,4 +24,6 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE isComplete = 0 LIMIT 1")
     fun getFirstIncompleteTask(): Flow<Task?>
 
+    @Query("UPDATE tasks SET isComplete = 0")
+    suspend fun resetAllTasks()
 }
