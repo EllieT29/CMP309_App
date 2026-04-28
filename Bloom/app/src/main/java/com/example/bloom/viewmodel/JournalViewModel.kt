@@ -1,11 +1,13 @@
-package com.example.bloom
+package com.example.bloom.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.bloom.data.AppDatabase
+import com.example.bloom.data.Journal
+import com.example.bloom.data.JournalRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-
 
 //ViewModel for JournalDao
 class JournalViewModel(application: Application) : AndroidViewModel(application) {
@@ -16,7 +18,7 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
 
     //Initialising the repository and all journals
     init {
-        val journalDao = AppDatabase.getDatabase(application).journalDao()
+        val journalDao = AppDatabase.Companion.getDatabase(application).journalDao()
         repository = JournalRepository(journalDao)
         allJournals = repository.allJournals
     }

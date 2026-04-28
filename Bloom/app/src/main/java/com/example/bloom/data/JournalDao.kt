@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.data
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -16,7 +16,7 @@ interface JournalDao {
     fun getAllJournals(): Flow<List<Journal>>
 
     //Query to insert a journal into the journals table
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insertJournal(journal: Journal)
 
     //Query to update a journal in the journals table

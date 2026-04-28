@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.ui
 
 import android.content.Intent
 import androidx.compose.material.icons.Icons

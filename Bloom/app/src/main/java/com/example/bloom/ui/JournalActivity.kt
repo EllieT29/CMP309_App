@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -42,6 +42,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.bloom.viewmodel.JournalViewModel
+import com.example.bloom.data.Journal
+import com.example.bloom.data.ThemeRepository
 import com.example.bloom.ui.theme.BloomTheme
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -1,14 +1,15 @@
-package com.example.bloom
+package com.example.bloom.data
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.bloom.data.Task
+import com.example.bloom.data.TaskDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 @Database(entities = [Journal::class, Task::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
@@ -49,7 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onCreate(db)
                 //Launch a coroutine on the IO thread to populate the tasks table
                 CoroutineScope(Dispatchers.IO).launch {
-                    AppDatabase.Companion.INSTANCE?.let { database ->
+                    INSTANCE?.let { database ->
                         //Populate predefined tasks into the database using the TaskDao
                         populateTasks(database.taskDao())
                     }
@@ -60,11 +61,31 @@ abstract class AppDatabase : RoomDatabase() {
             suspend fun populateTasks(taskDao: TaskDao) {
                 //List of predefined tasks to insert into the database
                 val predefinedTasks = listOf(
-                    Task(title = "Go Outside", description = "Step into nature. Breathe in the fresh air.", isComplete = false),
-                    Task(title = "Ground Yourself", description = "Place your hands on a tree, grass or earth and feel the connection.", isComplete = false),
-                    Task(title = "Awaken the Senses", description = "Notice 3 colours, 3 sounds and 3 textures around you outside.", isComplete = false),
-                    Task(title = "Release", description = "Take 3 deep breaths and softly let go of any tension.", isComplete = false),
-                    Task(title = "Reflect", description = "In your journal, either your app journal or a physical one, write an insight or feeling about your time outside.", isComplete = false)
+                    Task(
+                        title = "Go Outside",
+                        description = "Step into nature. Breathe in the fresh air.",
+                        isComplete = false
+                    ),
+                    Task(
+                        title = "Ground Yourself",
+                        description = "Place your hands on a tree, grass or earth and feel the connection.",
+                        isComplete = false
+                    ),
+                    Task(
+                        title = "Awaken the Senses",
+                        description = "Notice 3 colours, 3 sounds and 3 textures around you outside.",
+                        isComplete = false
+                    ),
+                    Task(
+                        title = "Release",
+                        description = "Take 3 deep breaths and softly let go of any tension.",
+                        isComplete = false
+                    ),
+                    Task(
+                        title = "Reflect",
+                        description = "In your journal, either your app journal or a physical one, write an insight or feeling about your time outside.",
+                        isComplete = false
+                    )
                 )
                 //Insert the predefined tasks into the database
                 taskDao.insertAll(predefinedTasks)

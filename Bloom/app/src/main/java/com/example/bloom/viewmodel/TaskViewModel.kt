@@ -1,8 +1,11 @@
-package com.example.bloom
+package com.example.bloom.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.bloom.data.AppDatabase
+import com.example.bloom.data.Task
+import com.example.bloom.data.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -15,7 +18,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     //Initialise the repository, get all tasks and check if reset is required
     init {
-        val taskDao = AppDatabase.getDatabase(application).taskDao()
+        val taskDao = AppDatabase.Companion.getDatabase(application).taskDao()
         repository = TaskRepository(taskDao, application)
         allTasks = repository.allTasks
         viewModelScope.launch {repository.checkAndResetTasks()}

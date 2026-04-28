@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.ui
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -78,6 +78,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.bloom.BuildConfig
+import com.example.bloom.viewmodel.MainViewModel
+import com.example.bloom.service.MeditateService
+import com.example.bloom.viewmodel.TaskViewModel
+import com.example.bloom.data.ThemeRepository
 import com.example.bloom.network.ApiSecurityManager
 import com.example.bloom.network.QuoteViewModel
 import com.example.bloom.ui.theme.BloomTheme
@@ -160,7 +165,7 @@ class MainActivity : ComponentActivity() {
             val isDarkMode = remember { mutableStateOf(themeRepository.getTheme()) }
             // Bind to the music service
             val intent = Intent(this, MeditateService::class.java)
-            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            bindService(intent, connection, BIND_AUTO_CREATE)
             BloomTheme(darkTheme = isDarkMode.value) {
 
                 //Permission to post notifications
@@ -260,7 +265,10 @@ fun MyApp(
 // Composable for the top app bar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, themeRepository: ThemeRepository = ThemeRepository(LocalContext.current)) {
+fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, themeRepository: ThemeRepository = ThemeRepository(
+    LocalContext.current
+)
+) {
     var menuExpanded by remember { mutableStateOf(false) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination

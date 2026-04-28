@@ -1,11 +1,11 @@
-package com.example.bloom
+package com.example.bloom.service
 
 import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
-
+import com.example.bloom.R
 
 //Used GeeksforGeeks - https://www.geeksforgeeks.org/kotlin/services-in-android-using-jetpack-compose/
 //Used Medium for enhancing the service (binding, pause feature etc -

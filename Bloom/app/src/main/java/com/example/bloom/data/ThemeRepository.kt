@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.data
 
 import android.content.Context
 import android.content.SharedPreferences

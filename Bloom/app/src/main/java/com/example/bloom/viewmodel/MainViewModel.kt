@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +12,7 @@ class MainViewModel(networkObserver: ConnectivityObserver): ViewModel() {
     //Get the current network connectivity status
     val isConnected = networkObserver.isConnectedFlow.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
+        started = SharingStarted.Companion.WhileSubscribed(5000L),
         initialValue = false
     )
 }

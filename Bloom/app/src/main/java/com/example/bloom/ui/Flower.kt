@@ -1,8 +1,9 @@
-package com.example.bloom
+package com.example.bloom.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
+import com.example.bloom.R
 
 //Flower composable for displaying the flower image
 @Composable

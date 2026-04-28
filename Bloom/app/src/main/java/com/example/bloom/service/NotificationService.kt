@@ -1,11 +1,10 @@
-package com.example.bloom
+package com.example.bloom.service
 
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import com.example.bloom.R
 import kotlin.random.Random
-
-// Used - https://medium.com/@kathankraithatha/notifications-with-jetpack-compose-3302f27e1348
 
 //Notification service for showing notifications
 class NotificationService (
@@ -27,7 +26,7 @@ class NotificationService (
 
         //Show the notification
         notificationManager.notify(
-            Random.nextInt(),
+            Random.Default.nextInt(),
             notification
         )
     }
@@ -36,7 +35,7 @@ class NotificationService (
     fun showNewTaskNotification(taskTitle:String){
 
         //Create the notification
-        val notification=NotificationCompat.Builder(context,"task_notification")
+        val notification= NotificationCompat.Builder(context,"task_notification")
             .setContentTitle("Your New Task")
             .setContentText(taskTitle)
             .setSmallIcon(R.drawable.task_icon)
@@ -45,6 +44,6 @@ class NotificationService (
             .build()
 
         //Show the notification
-        notificationManager.notify(Random.nextInt(),notification)
+        notificationManager.notify(Random.Default.nextInt(),notification)
     }
 }

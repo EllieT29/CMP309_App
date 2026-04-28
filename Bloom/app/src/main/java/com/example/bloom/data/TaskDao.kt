@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -15,7 +15,7 @@ interface TaskDao {
     fun getAllTasks(): Flow<List<Task>>
 
     //Query for inserting all tasks
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
     suspend fun insertAll(tasks: List<Task>)
 
     //Query for updating a task

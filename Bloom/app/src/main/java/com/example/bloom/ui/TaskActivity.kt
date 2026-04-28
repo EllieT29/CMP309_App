@@ -1,4 +1,4 @@
-package com.example.bloom
+package com.example.bloom.ui
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -45,6 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import com.example.bloom.service.NotificationService
+import com.example.bloom.viewmodel.TaskViewModel
+import com.example.bloom.data.Task
+import com.example.bloom.data.ThemeRepository
 import com.example.bloom.ui.theme.BloomTheme
 import kotlin.getValue
 
@@ -77,7 +81,7 @@ class TaskActivity : ComponentActivity() {
             BloomTheme(darkTheme = themeRepository.getTheme()) {
 
                 //Create a notification service
-                val notificationService=NotificationService(this)
+                val notificationService= NotificationService(this)
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),

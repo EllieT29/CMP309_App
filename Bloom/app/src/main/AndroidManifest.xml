@@ -17,10 +17,10 @@
         android:theme="@style/Theme.Bloom">
 
         <!-- Meditate Service -->
-        <service android:name=".MeditateService" />
+        <service android:name=".service.MeditateService" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Bloom">
             <intent-filter>
@@ -30,12 +30,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".JournalActivity"
+            android:name=".ui.JournalActivity"
             android:exported="false"
             android:label="Journal"
             android:theme="@style/Theme.Bloom" />
         <activity
-            android:name=".TaskActivity"
+            android:name=".ui.TaskActivity"
             android:exported="false"
             android:label="Task"
             android:theme="@style/Theme.Bloom" />
