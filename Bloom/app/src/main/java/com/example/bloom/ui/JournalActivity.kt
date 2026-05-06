@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.bloom.viewmodel.JournalViewModel
 import com.example.bloom.data.Journal
@@ -49,6 +50,7 @@ import com.example.bloom.ui.theme.BloomTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.getValue
+import com.example.bloom.R
 
 class JournalActivity : ComponentActivity() {
 
@@ -72,7 +74,7 @@ class JournalActivity : ComponentActivity() {
                 ) {
                     JournalScreen(
                         viewModel = viewModel,
-                        onBack = { finish() }
+                        onBack = { finish() },
                     )
                 }
             }
@@ -94,10 +96,10 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {//Top Bar of screen
             TopAppBar(
-                title = { Text("Journal", style = MaterialTheme.typography.headlineLarge) },
+                title = { Text(stringResource(R.string.nav_journal), style = MaterialTheme.typography.headlineLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_navigation))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -105,7 +107,7 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                 ),
                 actions = {//Button for clearing all journals
                     IconButton(onClick = { viewModel.deleteAll() }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear All")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.clear_journal))
                     }
                 }
             )
@@ -125,7 +127,7 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                 OutlinedTextField(//Text field for user to input their entry
                     value = newNote,
                     onValueChange = { newNote = it },
-                    label = { Text("Your Reflection") },
+                    label = { Text(stringResource(R.string.textfield_label)) },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -136,7 +138,7 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                         newNote = ""
                     }
                 }) {
-                    Text("Add")
+                    Text(stringResource(R.string.add_button))
                 }
             }
 
@@ -150,9 +152,10 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
                 items(journals) { journal ->
                     JournalEntry(
                         journal = journal,
-                        onDelete = { viewModel.delete(journal) }//Deleting the entry when delete button is pressed
-                    )
+                        onDelete = { viewModel.delete(journal) },//Deleting the entry when delete button is pressed
+                        )
                 }
+
             }
         }
     }
@@ -181,7 +184,7 @@ fun JournalEntry(journal: Journal, onDelete: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(//Displaying the entry date
-                text = "Entry Date:  $formattedDate",
+                text = stringResource(R.string.entry_date) + " " + formattedDate,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -200,7 +203,7 @@ fun JournalEntry(journal: Journal, onDelete: () -> Unit) {
                 style = MaterialTheme.typography.bodyLarge
             )
             IconButton(onClick = onDelete) {//Button for deleting the entry
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_button))
             }
         }
     }

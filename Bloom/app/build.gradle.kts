@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.compose.ui.text)
     implementation("androidx.compose.foundation:foundation-layout:1.10.6")
+    implementation(libs.androidx.ui)
     ksp(libs.androidx.room.compiler)
 
     //DataStore

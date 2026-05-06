@@ -43,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.example.bloom.service.NotificationService
@@ -51,6 +52,7 @@ import com.example.bloom.data.Task
 import com.example.bloom.data.ThemeRepository
 import com.example.bloom.ui.theme.BloomTheme
 import kotlin.getValue
+import com.example.bloom.R
 
 
 class TaskActivity : ComponentActivity() {
@@ -65,10 +67,11 @@ class TaskActivity : ComponentActivity() {
         //Initialise the theme repository
         themeRepository = ThemeRepository(this)
 
+        val context = applicationContext
         //Create a notification channel for tasks
         val notificationChannel= NotificationChannel(
-            "task_notification",
-            "Task",
+            context.getString(R.string.notification_channel_name),
+            context.getString(R.string.nav_tasks),
             NotificationManager.IMPORTANCE_HIGH
         )
         //Get the system NotificationManager service
@@ -89,7 +92,7 @@ class TaskActivity : ComponentActivity() {
                     TaskScreen(
                         viewModel = viewModel,
                         onBack = { finish() },
-                        notificationService
+                        notificationService,
                     )
                 }
             }
@@ -99,7 +102,11 @@ class TaskActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService: NotificationService) {
+fun TaskScreen(
+    viewModel: TaskViewModel,
+    onBack: () -> Unit,
+    notificationService: NotificationService,
+) {
 
     //Get all tasks and the number of completed tasks
     val tasks by viewModel.allTasks.collectAsState(initial = emptyList())
@@ -108,10 +115,10 @@ fun TaskScreen(viewModel: TaskViewModel, onBack: () -> Unit, notificationService
     Scaffold(
         topBar = {//Top app bar
             TopAppBar(
-                title = { Text("My Tasks", style = MaterialTheme.typography.headlineLarge) },
+                title = { Text(stringResource(R.string.task_title), style = MaterialTheme.typography.headlineLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_navigation))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -217,7 +224,7 @@ fun TaskItem(task: Task, onToggle: () -> Unit, modifier: Modifier = Modifier) {
             IconButton(onClick = { expanded = !expanded }) {//Button to expand task details
                 Icon(
                     Icons.Default.ArrowDropDown,
-                    contentDescription = "Show More",
+                    contentDescription = stringResource(R.string.show_more),
                     modifier = Modifier.size(40.dp)
                 )
             }

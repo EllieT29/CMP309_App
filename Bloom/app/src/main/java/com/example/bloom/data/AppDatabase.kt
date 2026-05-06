@@ -5,11 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.bloom.data.Task
-import com.example.bloom.data.TaskDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.example.bloom.R
 
 @Database(entities = [Journal::class, Task::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
@@ -32,7 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "app_database"
                 )
                     .fallbackToDestructiveMigration()
-                    .addCallback(DatabaseCallback())
+                    .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
                 instance
@@ -44,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
         //The AI used was Google Gemini
 
         //DatabaseCallback handles actions to be performed when the database is created
-        private class DatabaseCallback : Callback() {
+        private class DatabaseCallback(private val context: Context) : Callback() {
             //Override onCreate to populate the database after it has been created
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
@@ -52,38 +51,38 @@ abstract class AppDatabase : RoomDatabase() {
                 CoroutineScope(Dispatchers.IO).launch {
                     INSTANCE?.let { database ->
                         //Populate predefined tasks into the database using the TaskDao
-                        populateTasks(database.taskDao())
+                        populateTasks(database.taskDao(), context)
                     }
                 }
             }
 
             //Suspend function to insert predefined tasks into the database
-            suspend fun populateTasks(taskDao: TaskDao) {
+            suspend fun populateTasks(taskDao: TaskDao, context: Context) {
                 //List of predefined tasks to insert into the database
                 val predefinedTasks = listOf(
                     Task(
-                        title = "Go Outside",
-                        description = "Step into nature. Breathe in the fresh air.",
+                        title = context.getString(R.string.task1_title),
+                        description = context.getString(R.string.task1_description),
                         isComplete = false
                     ),
                     Task(
-                        title = "Ground Yourself",
-                        description = "Place your hands on a tree, grass or earth and feel the connection.",
+                        title = context.getString(R.string.task2_title),
+                        description = context.getString(R.string.task2_description),
                         isComplete = false
                     ),
                     Task(
-                        title = "Awaken the Senses",
-                        description = "Notice 3 colours, 3 sounds and 3 textures around you outside.",
+                        title = context.getString(R.string.task3_title),
+                        description = context.getString(R.string.task3_description),
                         isComplete = false
                     ),
                     Task(
-                        title = "Release",
-                        description = "Take 3 deep breaths and softly let go of any tension.",
+                        title = context.getString(R.string.task4_title),
+                        description = context.getString(R.string.task4_description),
                         isComplete = false
                     ),
                     Task(
-                        title = "Reflect",
-                        description = "In your journal, either your app journal or a physical one, write an insight or feeling about your time outside.",
+                        title = context.getString(R.string.task5_title),
+                        description = context.getString(R.string.task5_description),
                         isComplete = false
                     )
                 )

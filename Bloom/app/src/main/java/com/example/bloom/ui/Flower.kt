@@ -3,6 +3,7 @@ package com.example.bloom.ui
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.example.bloom.R
 
 //Flower composable for displaying the flower image
@@ -23,6 +24,6 @@ fun Flower(count: Int){
     //Displaying the flower image using the Image composable
     Image(
         painter = painterResource(imageResource),
-        contentDescription = "Completed tasks"
+        contentDescription = stringResource(R.string.completed_tasks),
     )
 }

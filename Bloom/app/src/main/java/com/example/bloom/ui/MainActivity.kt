@@ -63,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -94,6 +95,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.example.bloom.network.ConnectivityObserver
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.example.bloom.R
 
 class MainActivity : ComponentActivity() {
 
@@ -148,10 +150,11 @@ class MainActivity : ComponentActivity() {
         //Initialise the theme repository
         themeRepository = ThemeRepository(this)
 
+        val context = applicationContext
         //Create a notification channel
         val notificationChannel= NotificationChannel(
-            "task_notification",
-            "Task",
+            context.getString(R.string.notification_channel_name),
+            context.getString(R.string.nav_tasks),
             NotificationManager.IMPORTANCE_HIGH
         )
         //Get the system NotificationManager service
@@ -214,8 +217,8 @@ fun MyApp(
 
     //Get details of first incomplete task
     val firstIncompleteTask by viewModel.firstIncompleteTask.collectAsState(initial = null)
-    val currentTask = firstIncompleteTask?.title?: "Well done! You have completed all your tasks!"
-    val currentDescription = firstIncompleteTask?.description?: "Take a break and be proud :)"
+    val currentTask = firstIncompleteTask?.title?: stringResource(R.string.completion_message)
+    val currentDescription = firstIncompleteTask?.description?: stringResource(R.string.completion_description)
 
     // Scaffold provides a framework for the app's layout
     Scaffold(
@@ -265,21 +268,23 @@ fun MyApp(
 // Composable for the top app bar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, themeRepository: ThemeRepository = ThemeRepository(
-    LocalContext.current
-)
+fun TopBar(
+    navController: NavController,
+    isDarkMode: MutableState<Boolean>,
+    themeRepository: ThemeRepository = ThemeRepository(LocalContext.current),
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val context = LocalContext.current
 
+
     // A screen is a top-level screen if it's in our bottom nav.
     val isTopLevelDestination = bottomNavItems.any { it.route == currentDestination?.route }
 
     TopAppBar(
         title = { Text(
-            "Bloom",
+            stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineLarge,
             fontFamily = FontFamily.Cursive,
             fontWeight = FontWeight.Bold,
@@ -294,7 +299,7 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(R.string.back_navigation)
                     )
                 }
             }
@@ -311,7 +316,7 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
             ){
                 Icon(
                     imageVector = if (isDarkMode.value) Icons.Filled.WbSunny else Icons.Filled.DarkMode,
-                    contentDescription = "Icon",
+                    contentDescription = stringResource(R.string.dark_light),
                     modifier = Modifier.size(30.dp)
                 )
 
@@ -320,7 +325,7 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
             IconButton(onClick = { menuExpanded = !menuExpanded }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More"
+                    contentDescription = stringResource(R.string.show_more)
                 )
             }
             // Dropdown menu for navigation
@@ -330,7 +335,7 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
             ) {
                 // Dropdown menu item for Journal
                 DropdownMenuItem(
-                    text = { Text("Journal") },
+                    text = { Text(stringResource(R.string.nav_journal)) },
                     onClick = {
                         val intent = Intent(context, JournalActivity::class.java)
                         context.startActivity(intent)
@@ -339,7 +344,7 @@ fun TopBar(navController: NavController, isDarkMode: MutableState<Boolean>, them
                 )
                 // Dropdown menu item for Tasks
                 DropdownMenuItem(
-                    text = { Text("Tasks") },
+                    text = { Text(stringResource(R.string.nav_tasks)) },
                     onClick = {
                         val intent = Intent(context, TaskActivity::class.java)
                         context.startActivity(intent)
@@ -380,7 +385,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, music: MeditateService?) {
             // https://developer.android.com/develop/ui/compose/text/style-paragraph
             //https://developer.android.com/develop/ui/compose/layouts/basics
             Text(
-                text = "Guided Meditation",
+                text = stringResource(R.string.meditation_title),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start,
@@ -407,13 +412,13 @@ fun MeditateMusic(modifier: Modifier = Modifier, music: MeditateService?) {
                     if (isPlaying) {
                         Icon(
                             Icons.Filled.Pause,
-                            contentDescription = "Pause",
+                            contentDescription = stringResource(R.string.meditation_pause),
                             modifier = Modifier.size(60.dp)
                         )
                     } else {
                         Icon(
                             Icons.Filled.PlayArrow,
-                            contentDescription = "Play",
+                            contentDescription = stringResource(R.string.meditation_play),
                             modifier = Modifier.size(60.dp)
                         )
                     }
@@ -429,7 +434,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, music: MeditateService?) {
                     ) {
                         Icon(
                             Icons.Filled.Stop,
-                            contentDescription = "Stop",
+                            contentDescription = stringResource(R.string.meditation_stop),
                             modifier = Modifier.size(60.dp)
                         )
                     }
@@ -438,12 +443,12 @@ fun MeditateMusic(modifier: Modifier = Modifier, music: MeditateService?) {
             if (expanded) {//Details about meditation
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
-                    text = "This is 'The Tension Release Meditation' by Vidyamala Burch, Breathworks",
+                    text = stringResource(R.string.meditation_description),
                     style = MaterialTheme.typography.headlineSmall
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
-                    text = "For more you can visit The Free Mindfulness Project at https://www.freemindfulness.org/download",
+                    text = stringResource(R.string.meditation_source),
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
@@ -453,7 +458,7 @@ fun MeditateMusic(modifier: Modifier = Modifier, music: MeditateService?) {
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = if (expanded) "Hide Details" else "Show Details",
+                    text = if (expanded) stringResource(R.string.toggle_hide) else stringResource(R.string.toggle_show),
                     fontSize = 20.sp
                 )
             }
@@ -487,7 +492,7 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
         {//https://developer.android.com/develop/ui/compose/text/style-paragraph
             //https://developer.android.com/develop/ui/compose/layouts/basics
             Text(
-                text = "Current Task",
+                text = stringResource(R.string.current_task),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start,
@@ -513,7 +518,7 @@ fun CurrentTask(modifier: Modifier = Modifier, task: String, description: String
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = if (expanded) "Hide Details" else "Show Details",
+                    text = if (expanded) stringResource(R.string.toggle_hide) else stringResource(R.string.toggle_show),
                     fontSize = 20.sp
                 )
             }
@@ -553,7 +558,7 @@ fun DailyQuote(
         {//https://developer.android.com/develop/ui/compose/text/style-paragraph
             //https://developer.android.com/develop/ui/compose/layouts/basics
             Text(
-                text = "Quote of the Day",
+                text = stringResource(R.string.quote_title),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start,
@@ -563,7 +568,7 @@ fun DailyQuote(
 
             if(!isConnected) {//If offline then display message to connect to network
                 Text(
-                    text = "You are currently offline. Connect to see today's quote.",
+                    text = stringResource(R.string.offline_message),
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -571,14 +576,14 @@ fun DailyQuote(
             }else {//If online
                 if (quoteViewModel.isLoading) {//If loading then display loading message
                     Text(
-                        "Loading...",
+                        stringResource(R.string.loading_message),
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center
                     )
                 }
                 quoteViewModel.errorMessage?.let {//If error then display error message
                     Text(
-                        text = "Error Try again",
+                        text = stringResource(R.string.error_message),
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                     )

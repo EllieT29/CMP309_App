@@ -1,3 +1,63 @@
 <resources>
     <string name="app_name">Bloom</string>
+
+    <!-- Task Strings -->
+    <string name="task1_title">Go Outside</string>
+    <string name="task1_description">Step into nature. Breathe in the fresh air.</string>
+    <string name="task2_title">Ground Yourself</string>
+    <string name="task2_description">Place your hands on a tree, grass or earth and feel the connection.</string>
+    <string name="task3_title">Awaken the Senses</string>
+    <string name="task3_description">Notice 3 colours, 3 sounds and 3 textures around you outside.</string>
+    <string name="task4_title">Release</string>
+    <string name="task4_description">Take 3 deep breaths and softly let go of any tension.</string>
+    <string name="task5_title">Reflect</string>
+    <string name="task5_description">In your journal, either your app journal or a physical one, write an insight or feeling about your time outside.</string>
+
+    <!-- Journal Strings -->
+    <string name="clear_journal">Clear All</string>
+    <string name="textfield_label">Your Reflection</string>
+    <string name="add_button">Add</string>
+    <string name="delete_button">Delete</string>
+    <string name="entry_date">Entry Date:</string>
+
+    <string name="task_title">My Tasks</string>
+    <string name="show_more">Show More</string>
+
+    <!-- Navigation Strings -->
+    <string name="nav_home">Home</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_journal">Journal</string>
+    <string name="back_navigation">Back</string>
+
+    <!-- Home Strings - Meditation -->
+    <string name="meditation_title">Guided Meditation</string>
+    <string name="meditation_description">This is The Tension Release Meditation by Vidyamala Burch, Brethworks</string>
+    <string name="meditation_source">For more you can visit The Free Mindfulness Project at https://www.freemindfulness.org/download</string>
+    <string name="meditation_play">Play</string>
+    <string name="meditation_pause">Pause</string>
+    <string name="meditation_stop">Stop</string>
+
+    <!-- Home Strings - Tasks -->
+    <string name="current_task">Current Task</string>
+    <string name="completion_message">Well done! You have completed all your tasks!</string>
+    <string name="completion_description">Take a proud and be proud :)</string>
+
+    <!-- Home Strings - Quote -->
+    <string name="quote_title">Quote of the Day</string>
+    <string name="offline_message">You are offline. Connect to see the quote.</string>
+    <string name="loading_message">Loading...</string>
+    <string name="error_message">Error try again</string>
+
+    <string name="toggle_show">Show Details</string>
+    <string name="toggle_hide">Hide Details</string>
+
+    <!-- Notification Strings -->
+    <string name="completed_notification_title">Your Flower has bloomed!</string>
+    <string name="notification_description">All tasks complete - have a look at your beautiful flower!</string>
+    <string name="new_task_notification">Your New Task</string>
+    <string name="notification_channel_name">task_notification</string>
+
+    <string name="dark_light">Dark and Light Theme Toggle</string>
+
+    <string name="completed_tasks">Completed Tasks</string>
 </resources>
