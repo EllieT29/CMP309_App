@@ -7,6 +7,7 @@ import com.example.bloom.R
 import kotlin.random.Random
 
 //Notification service for showing notifications
+// Used - https://medium.com/@kathankraithatha/notifications-with-jetpack-compose-3302f27e1348
 class NotificationService (
     private val context: Context
 ){
